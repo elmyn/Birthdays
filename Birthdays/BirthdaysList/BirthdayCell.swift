@@ -9,70 +9,94 @@
 import UIKit
 
 class BirthdayCell: UITableViewCell {
-
-  let patternView: UIView
-  let nameLabel: UILabel
-  let patternNameLabel: UILabel
-  let birthdayLabel: UILabel
-  var patternWidthConstraint: NSLayoutConstraint?
-  
-  override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
     
-    patternView = UIView()
-    patternView.translatesAutoresizingMaskIntoConstraints = false
-    patternView.clipsToBounds = true
+    //MARK: - vars
+    var patternWidthConstraint: NSLayoutConstraint?
     
-    nameLabel = UILabel()
-    nameLabel.translatesAutoresizingMaskIntoConstraints = false
-    nameLabel.font = .systemFontOfSize(30)
+    lazy var patternView:UIView = {
+        var tmpPatternView = UIView()
+        tmpPatternView.translatesAutoresizingMaskIntoConstraints = false
+        tmpPatternView.clipsToBounds = true
+        tmpPatternView.backgroundColor = UIColor(patternImage: UIImage(named: "cellBackgroundPattern")!)
+        return tmpPatternView
+    }()
     
-    patternNameLabel = UILabel()
-    patternNameLabel.translatesAutoresizingMaskIntoConstraints = false
-    patternNameLabel.font = nameLabel.font
-    patternNameLabel.textColor = .whiteColor()
+    lazy var nameLabel:UILabel = {
+        var tmpNameLabel = UILabel()
+        tmpNameLabel.translatesAutoresizingMaskIntoConstraints = false
+        tmpNameLabel.font = .systemFontOfSize(30)
+        return tmpNameLabel
+    }()
     
-    birthdayLabel = UILabel()
-    birthdayLabel.translatesAutoresizingMaskIntoConstraints = false
+    lazy var patternNameLabel:UILabel = {
+        var tmpPatternNameLabel = UILabel()
+        tmpPatternNameLabel.translatesAutoresizingMaskIntoConstraints = false
+        tmpPatternNameLabel.font = self.nameLabel.font
+        tmpPatternNameLabel.textColor = .whiteColor()
+        return tmpPatternNameLabel
+    }()
     
-    super.init(style: style, reuseIdentifier: reuseIdentifier)
+    lazy var birthdayLabel:UILabel = {
+        var tmpBirthdayLabel = UILabel()
+        tmpBirthdayLabel.translatesAutoresizingMaskIntoConstraints = false
+        return tmpBirthdayLabel
+    }()
     
-    patternView.backgroundColor = UIColor(patternImage: UIImage(named: "cellBackgroundPattern")!)
-    
-    addSubview(nameLabel)
-    addSubview(birthdayLabel)
-    addSubview(patternView)
-    patternView.addSubview(patternNameLabel)
-    
-    let views = ["pattern": patternView, "name": nameLabel, "birthday": birthdayLabel]
-    var layoutConstraints = [NSLayoutConstraint]()
-    
-    layoutConstraints += NSLayoutConstraint.constraintsWithVisualFormat("|[pattern]", options: [], metrics: nil, views: views)
-    layoutConstraints += NSLayoutConstraint.constraintsWithVisualFormat("V:|[pattern]|", options: [], metrics: nil, views: views)
-    patternWidthConstraint = patternView.widthAnchor.constraintEqualToConstant(0)
-    layoutConstraints.append(patternWidthConstraint!)
-    layoutConstraints.append(nameLabel.centerXAnchor.constraintEqualToAnchor(centerXAnchor))
-    layoutConstraints.append(nameLabel.centerYAnchor.constraintEqualToAnchor(centerYAnchor))
-    layoutConstraints += NSLayoutConstraint.constraintsWithVisualFormat("[birthday]-|", options: [], metrics: nil, views: views)
-    layoutConstraints += NSLayoutConstraint.constraintsWithVisualFormat("V:[birthday]|", options: [], metrics: nil, views: views)
-    
-    layoutConstraints.append(patternNameLabel.leadingAnchor.constraintEqualToAnchor(nameLabel.leadingAnchor))
-    layoutConstraints.append(patternNameLabel.centerYAnchor.constraintEqualToAnchor(nameLabel.centerYAnchor))
-    
-    NSLayoutConstraint.activateConstraints(layoutConstraints)
-  }
-
-  required init?(coder aDecoder: NSCoder) {
-      fatalError("init(coder:) has not been implemented")
-  }
-  
-  func updateWithItem<T>(item: T, progress: Float) {
-    if item is Birthday {
-      let birthday = item as! Birthday
-      nameLabel.text = birthday.firstName
-      patternNameLabel.text = birthday.firstName
-      birthdayLabel.text = "\(birthday.birthday.day) \(birthday.birthday.month)"
-
-      patternWidthConstraint?.constant = CGFloat(progress)*frame.size.width
+    //MARK: - inits
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+        
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        self.setupAutolayout()
     }
-  }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+//MARK: - autolayout
+
+extension BirthdayCell {
+    func setupAutolayout(){
+        addSubview(nameLabel)
+        addSubview(birthdayLabel)
+        addSubview(patternView)
+        addSubview(patternNameLabel)
+        
+        let views = ["pattern": patternView, "name": nameLabel, "birthday": birthdayLabel]
+        
+        
+        var layoutConstraints = [NSLayoutConstraint]()
+        
+        
+        layoutConstraints += NSLayoutConstraint.constraintsWithVisualFormat("|[pattern]", options: [], metrics: nil, views: views)
+        layoutConstraints += NSLayoutConstraint.constraintsWithVisualFormat("V:|[pattern]|", options: [], metrics: nil, views: views)
+        patternWidthConstraint = patternView.widthAnchor.constraintEqualToConstant(0)
+        layoutConstraints.append(patternWidthConstraint!)
+        layoutConstraints.append(nameLabel.centerXAnchor.constraintEqualToAnchor(centerXAnchor))
+        layoutConstraints.append(nameLabel.centerYAnchor.constraintEqualToAnchor(centerYAnchor))
+        
+        layoutConstraints += NSLayoutConstraint.constraintsWithVisualFormat("[birthday]-|", options: [], metrics: nil, views: views)
+        layoutConstraints += NSLayoutConstraint.constraintsWithVisualFormat("V:|[birthday]|", options: [], metrics: nil, views: views)
+        
+        layoutConstraints.append(patternNameLabel.leadingAnchor.constraintEqualToAnchor(nameLabel.leadingAnchor))
+        layoutConstraints.append(patternNameLabel.centerYAnchor.constraintEqualToAnchor(nameLabel.centerYAnchor))
+        
+        NSLayoutConstraint.activateConstraints(layoutConstraints)
+    }
+}
+
+
+//MARK: - update methods
+extension BirthdayCell {
+    func updateWithItem<T>(item: T, progress: Float) {
+        if item is Birthday {
+            let birthday = item as! Birthday
+            nameLabel.text = birthday.firstName
+            patternNameLabel.text = birthday.firstName
+            birthdayLabel.text = "\(birthday.birthday.day) \(birthday.birthday.month)"
+            
+            patternWidthConstraint?.constant = CGFloat(progress)*frame.size.width
+        }
+    }
 }
